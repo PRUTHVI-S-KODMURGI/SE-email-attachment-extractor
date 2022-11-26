@@ -36,15 +36,21 @@ folder_path = StringVar()
 folder_path_entry = Entry(root, textvariable=folder_path)
 folder_path_entry.place(x=150, y=200)
 
+# Input for the Imap Server
+imap_label = Label(root, text="IMAP Server: ")
+imap_label.place(x=30, y=250)
+imap_server = StringVar()
+imap_server_entry = Entry(root, textvariable=imap_server)
+imap_server_entry.place(x=150, y=200)
+
 # Radio Button for selecting if emails need to get deleted after extracting the attachments
 delete_label = Label(root, text="Delete the emails after extracting the attachments: ")
-delete_label.place(x=30, y=250)
+delete_label.place(x=30, y=300)
 delete = 0
 delete_radio_yes = Radiobutton(root, text='Yes', value=1, variable=delete)
-delete_radio_yes.place(x=300, y=250)
+delete_radio_yes.place(x=300, y=300)
 delete_radio_no = Radiobutton(root, text='No', value=0, variable=delete)
-delete_radio_no.place(x=350, y=250)
-
+delete_radio_no.place(x=350, y=300)
 
 # def fetchattachments(username, password, folder, verbose = True, delete = False, imapserver = 'imap.free.fr'):
 #     """
