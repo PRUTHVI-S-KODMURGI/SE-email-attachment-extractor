@@ -1,10 +1,8 @@
 import imaplib # module to connect to the imap server
 import email # module to retrieve emails
 import os # module to save the attachments
-# import argparse # module to parse the arguments
-# from time import sleep # module to give a pause to the execution
 from tkinter import * # module for the GUI interface
-import datetime # module to retrieve the current timestamp
+from datetime import datetime # module to retrieve the current timestamp
 from tkinter import messagebox
 
 # Initializing a Tkinter window and giving it a title followed by giving the window a size with the help of the geometry method
@@ -90,7 +88,8 @@ def fetchattachments(username_val, password_val, folder_val, no_emails_val):
     Check emails
     Save attachments
     """
-    connection = imaplib.IMAP4_SSL('imap.free.fr', 993)
+    connection = imaplib.IMAP4_SSL('imap.gmail.com', 993)
+    verbose_txt_area.delete("1.0", "end")
 
     try:
         connection.login(username_val, password_val)
@@ -106,7 +105,7 @@ def fetchattachments(username_val, password_val, folder_val, no_emails_val):
         emails = emails_number.split()
         no_emails_traverse = min(len(emails), no_emails_val)
 
-        for em in range(no_emails_traverse):
+        for em in range(len(emails)-1, len(emails)-1-no_emails_traverse, -1):
             dummy_email = emails[em]
             connection.store(dummy_email, '+FLAGS', '(%s)' % 'SEEN')
             (type_email, msg_data) = connection.fetch(dummy_email, '(RFC822)')
@@ -117,12 +116,14 @@ def fetchattachments(username_val, password_val, folder_val, no_emails_val):
                 compteur = 0
                 for part in mail.walk():
                     compteur += 1
-                    
-                    timestamp = datetime.now()
-                    append_filename = str(timestamp.day)+str(timestamp.month)+str(timestamp.year)+str(timestamp.hour)+str(timestamp.minute)+str(timestamp.second)
-                    fileName = part.get_filename() + "_" + append_filename
-                    if bool(fileName): # None => False
+
+                    boolfileName = part.get_filename()
+                    if bool(boolfileName): # None => False
+                        timestamp = datetime.now()
+                        append_filename = str(timestamp.day)+str(timestamp.month)+str(timestamp.year)+str(timestamp.hour)+str(timestamp.minute)+str(timestamp.second)
+                        fileName = part.get_filename().split('.')[0] + "_" + append_filename + "." + part.get_filename().split('.')[-1]
                         filePath = os.path.join(folder_val, fileName)
+
                         if not os.path.isfile(filePath): # Check is there is already a file with the same name
                             fp = open(filePath, 'wb')
                             fp.write(part.get_payload(decode=True))
@@ -136,7 +137,6 @@ def fetchattachments(username_val, password_val, folder_val, no_emails_val):
         return
     
     messagebox.showinfo("Extraction Completion Confirmation", "The required number of attachments have been successfully extracted from the specified number of emails.")
-    clear_all()
 
 def fetchattachments_verbose(username_val, password_val, folder_val, no_emails_val):
     """
@@ -144,7 +144,8 @@ def fetchattachments_verbose(username_val, password_val, folder_val, no_emails_v
     Check emails
     Save attachments
     """
-    connection = imaplib.IMAP4_SSL('imap.free.fr', 993)
+    connection = imaplib.IMAP4_SSL('imap.gmail.com', 993)
+    verbose_txt_area.delete("1.0", "end")
 
     try:
         connection.login(username_val, password_val)
@@ -156,13 +157,13 @@ def fetchattachments_verbose(username_val, password_val, folder_val, no_emails_v
     try:
         (email_status, emails_number) = connection.select() # connect to the default folder (INBOX)
 
-        verbose_txt_area.insert(END, "There are "+int(emails_number[0])+" emails inside "+username_val+" account from the imap server 'imap.free.fr'")
+        verbose_txt_area.insert(END, "There are "+str(int(emails_number[0]))+" emails inside "+username_val+" account from the imap server 'imap.gmail.com'")
 
         (email_status, [emails_number]) = connection.search(None, 'ALL')
         emails = emails_number.split()
         no_emails_traverse = min(len(emails), no_emails_val)
 
-        for em in range(no_emails_traverse):
+        for em in range(len(emails)-1, len(emails)-1-no_emails_traverse, -1):
             dummy_email = emails[em]
             verbose_txt_area.insert(END, '\nWorking on mail number '+dummy_email.decode('utf8')) # dummy_email is in binary mode
 
@@ -175,14 +176,16 @@ def fetchattachments_verbose(username_val, password_val, folder_val, no_emails_v
                 compteur = 0
                 for part in mail.walk():
                     compteur += 1
-                    verbose_txt_area.insert(END, '\nPart '+compteur+' in mail.walk with Content Type : '+part.get_content_type)
-                    
-                    timestamp = datetime.now()
-                    append_filename = str(timestamp.day)+str(timestamp.month)+str(timestamp.year)+str(timestamp.hour)+str(timestamp.minute)+str(timestamp.second)
-                    fileName = part.get_filename() + "_" + append_filename
-                    if bool(fileName): # None => False
+                    verbose_txt_area.insert(END, '\nPart '+str(compteur)+' in mail.walk with Content Type : '+str(part.get_content_type))
+
+                    boolfileName = part.get_filename()
+                    if bool(boolfileName): # None => False
+                        timestamp = datetime.now()
+                        append_filename = str(timestamp.day)+str(timestamp.month)+str(timestamp.year)+str(timestamp.hour)+str(timestamp.minute)+str(timestamp.second)
+                        fileName = part.get_filename().split('.')[0] + "_" + append_filename + "." + part.get_filename().split('.')[-1]
                         verbose_txt_area.insert(END, '\nDetected file : '+fileName)
                         filePath = os.path.join(folder_val, fileName)
+
                         if not os.path.isfile(filePath): # Check is there is already a file with the same name
                             verbose_txt_area.insert(END, '\nWriting file')
                             fp = open(filePath, 'wb')
@@ -191,13 +194,12 @@ def fetchattachments_verbose(username_val, password_val, folder_val, no_emails_v
 
         connection.close()
         connection.logout()
-    except:
+    except Exception:
         messagebox.showerror("Error", "An error has occurred, please try again!")
         clear_all()
         return
     
     messagebox.showinfo("Extraction Completion Confirmation", "The required number of attachments have been successfully extracted from the specified number of emails.")
-    clear_all()
 
 def fetchattachments_delete(username_val, password_val, folder_val, no_emails_val):
     """
@@ -205,7 +207,8 @@ def fetchattachments_delete(username_val, password_val, folder_val, no_emails_va
     Check emails
     Save attachments
     """
-    connection = imaplib.IMAP4_SSL('imap.free.fr', 993)
+    connection = imaplib.IMAP4_SSL('imap.gmail.com', 993)
+    verbose_txt_area.delete("1.0", "end")
 
     try:
         connection.login(username_val, password_val)
@@ -221,7 +224,7 @@ def fetchattachments_delete(username_val, password_val, folder_val, no_emails_va
         emails = emails_number.split()
         no_emails_traverse = min(len(emails), no_emails_val)
 
-        for em in range(no_emails_traverse):
+        for em in range(len(emails)-1, len(emails)-1-no_emails_traverse, -1):
             dummy_email = emails[em]
             connection.store(dummy_email, '+FLAGS', '(%s)' % 'SEEN')
             (type_email, msg_data) = connection.fetch(dummy_email, '(RFC822)')
@@ -232,12 +235,14 @@ def fetchattachments_delete(username_val, password_val, folder_val, no_emails_va
                 compteur = 0
                 for part in mail.walk():
                     compteur += 1
-                    
-                    timestamp = datetime.now()
-                    append_filename = str(timestamp.day)+str(timestamp.month)+str(timestamp.year)+str(timestamp.hour)+str(timestamp.minute)+str(timestamp.second)
-                    fileName = part.get_filename() + "_" + append_filename
-                    if bool(fileName): # None => False
+                    boolfileName = part.get_filename()
+
+                    if bool(boolfileName): # None => False
+                        timestamp = datetime.now()
+                        append_filename = str(timestamp.day)+str(timestamp.month)+str(timestamp.year)+str(timestamp.hour)+str(timestamp.minute)+str(timestamp.second)
+                        fileName = part.get_filename().split('.')[0] + "_" + append_filename + "." + part.get_filename().split('.')[-1]
                         filePath = os.path.join(folder_val, fileName)
+
                         if not os.path.isfile(filePath): # Check is there is already a file with the same name
                             fp = open(filePath, 'wb')
                             fp.write(part.get_payload(decode=True))
@@ -251,7 +256,6 @@ def fetchattachments_delete(username_val, password_val, folder_val, no_emails_va
         return
     
     messagebox.showinfo("Extraction Completion Confirmation", "The required number of attachments have been successfully extracted from the specified number of emails.")
-    clear_all()
 
 def fetchattachments_verbose_delete(username_val, password_val, folder_val, no_emails_val):
     """
@@ -259,7 +263,8 @@ def fetchattachments_verbose_delete(username_val, password_val, folder_val, no_e
     Check emails
     Save attachments
     """
-    connection = imaplib.IMAP4_SSL('imap.free.fr', 993)
+    connection = imaplib.IMAP4_SSL('imap.gmail.com', 993)
+    verbose_txt_area.delete("1.0", "end")
 
     try:
         connection.login(username_val, password_val)
@@ -271,13 +276,13 @@ def fetchattachments_verbose_delete(username_val, password_val, folder_val, no_e
     try:
         (email_status, emails_number) = connection.select() # connect to the default folder (INBOX)
 
-        verbose_txt_area.insert(END, "There are "+int(emails_number[0])+" emails inside "+username_val+" account from the imap server 'imap.free.fr'")
+        verbose_txt_area.insert(END, "There are "+str(int(emails_number[0]))+" emails inside "+username_val+" account from the imap server 'imap.free.fr'")
 
         (email_status, [emails_number]) = connection.search(None, 'ALL')
         emails = emails_number.split()
         no_emails_traverse = min(len(emails), no_emails_val)
 
-        for em in range(no_emails_traverse):
+        for em in range(len(emails)-1, len(emails)-1-no_emails_traverse, -1):
             dummy_email = emails[em]
             verbose_txt_area.insert(END, '\nWorking on mail number '+dummy_email.decode('utf8')) # dummy_email is in binary mode
 
@@ -290,19 +295,22 @@ def fetchattachments_verbose_delete(username_val, password_val, folder_val, no_e
                 compteur = 0
                 for part in mail.walk():
                     compteur += 1
-                    verbose_txt_area.insert(END, '\nPart '+compteur+' in mail.walk with Content Type : '+part.get_content_type)
+                    verbose_txt_area.insert(END, '\nPart '+str(compteur)+' in mail.walk with Content Type : '+str(part.get_content_type))
                     
-                    timestamp = datetime.now()
-                    append_filename = str(timestamp.day)+str(timestamp.month)+str(timestamp.year)+str(timestamp.hour)+str(timestamp.minute)+str(timestamp.second)
-                    fileName = part.get_filename() + "_" + append_filename
-                    if bool(fileName): # None => False
+                    boolfileName = part.get_filename()
+                    if bool(boolfileName): # None => False
+                        timestamp = datetime.now()
+                        append_filename = str(timestamp.day)+str(timestamp.month)+str(timestamp.year)+str(timestamp.hour)+str(timestamp.minute)+str(timestamp.second)
+                        fileName = part.get_filename().split('.')[0] + "_" + append_filename + "." + part.get_filename().split('.')[-1]
                         verbose_txt_area.insert(END, '\nDetected file : '+fileName)
                         filePath = os.path.join(folder_val, fileName)
+
                         if not os.path.isfile(filePath): # Check is there is already a file with the same name
                             verbose_txt_area.insert(END, '\nWriting file')
                             fp = open(filePath, 'wb')
                             fp.write(part.get_payload(decode=True))
                             fp.close()
+
             connection.store(dummy_email, '+FLAGS', '\\Deleted')
 
         connection.expunge()
@@ -316,7 +324,6 @@ def fetchattachments_verbose_delete(username_val, password_val, folder_val, no_e
         return
     
     messagebox.showinfo("Extraction Completion Confirmation", "The required number of attachments have been successfully extracted from the specified number of emails.")
-    clear_all()
 
 def select_fetch():
     verbose_val = int(verbose.get())
