@@ -9,6 +9,7 @@ from tkinter import messagebox
 root = Tk()
 root.title("email-attachment-extractor")
 root.geometry("1920x1080")
+root.configure(bg='grey')
 
 # Heading of the Tkinter window
 Heading = LabelFrame(root, bd=2, relief="groove", bg="light yellow")
@@ -18,54 +19,54 @@ app_name = Label(Heading, text="Email Attachment Extractor", font="arial 20 bold
 global username, password, folder_path, delete, verbose, verbose_txt_area, no_emails
 
 # Input for the Username
-username_label = Label(root, text="Username: ")
-username_label.place(x=30, y=100)
+username_label = Label(root, text="Username: ",font='arial 12')
+username_label.place(x=50, y=160)
 username = StringVar()
-username_entry = Entry(root, textvariable=username, width=50)
-username_entry.place(x=150, y=100)
+username_entry = Entry(root, textvariable=username, width=50, font='arial 12')
+username_entry.place(x=220, y=160)
 
 # Input for the Password
-password_label = Label(root, text="Password: ")
-password_label.place(x=30, y=150)
+password_label = Label(root, text="Password: ",font='arial 12')
+password_label.place(x=50, y=210)
 password = StringVar()
-password_entry = Entry(root, textvariable=password, show='*', width=50)
-password_entry.place(x=150, y=150)
+password_entry = Entry(root, textvariable=password, show='*', width=50, font='arial 12')
+password_entry.place(x=220, y=210)
 
 # Input for the output folder path
-folder_path_label = Label(root, text="Output Folder Path: ")
-folder_path_label.place(x=30, y=200)
+folder_path_label = Label(root, text="Output Folder Path: ",font='arial 12')
+folder_path_label.place(x=50, y=260)
 folder_path = StringVar()
-folder_path_entry = Entry(root, textvariable=folder_path, width=50)
-folder_path_entry.place(x=150, y=200)
+folder_path_entry = Entry(root, textvariable=folder_path, width=50, font='arial 12')
+folder_path_entry.place(x=220, y=260)
 
 # Input for the Verbose
-verbose_label = Label(root, text="Verbose: ")
-verbose_label.place(x=30, y=250)
+verbose_label = Label(root, text="Verbose: ",font='arial 12')
+verbose_label.place(x=50, y=310)
 verbose = StringVar(None, '0')
-verbose_radio_yes = Radiobutton(root, text='Yes', value='1', variable=verbose)
-verbose_radio_yes.place(x=300, y=250)
-verbose_radio_no = Radiobutton(root, text='No', value='0', variable=verbose)
-verbose_radio_no.place(x=350, y=250)
+verbose_radio_yes = Radiobutton(root, text='Yes',font='arial 12', value='1', variable=verbose)
+verbose_radio_yes.place(x=540, y=310)
+verbose_radio_no = Radiobutton(root, text='No',font='arial 12', value='0', variable=verbose)
+verbose_radio_no.place(x=595, y=310)
 
 # Radio Button for selecting if emails need to get deleted after extracting the attachments
-delete_label = Label(root, text="Delete the emails after extracting the attachments: ")
-delete_label.place(x=30, y=300)
+delete_label = Label(root, text="Delete the emails after extracting the attachments: ", font='arial 12')
+delete_label.place(x=50, y=360)
 delete = StringVar(None, '0')
-delete_radio_yes = Radiobutton(root, text='Yes', value='1', variable=delete)
-delete_radio_yes.place(x=300, y=300)
-delete_radio_no = Radiobutton(root, text='No', value='0', variable=delete)
-delete_radio_no.place(x=350, y=300)
+delete_radio_yes = Radiobutton(root, text='Yes',font='arial 12', value='1', variable=delete)
+delete_radio_yes.place(x=540, y=360)
+delete_radio_no = Radiobutton(root, text='No',font='arial 12', value='0', variable=delete)
+delete_radio_no.place(x=595, y=360)
 
 # Input for the number of emails to be extracted
-no_emails_label = Label(root, text="Number of Emails from which attachments need to get extracted: ")
-no_emails_label.place(x=30, y=350)
+no_emails_label = Label(root, text="Number of Emails from which attachments need to get extracted: ",font='arial 12')
+no_emails_label.place(x=50, y=410)
 no_emails = IntVar()
-no_emails_entry = Entry(root, textvariable=no_emails, width=10)
-no_emails_entry.place(x=400, y=350)
+no_emails_entry = Entry(root, textvariable=no_emails, width=10, font='arial 12')
+no_emails_entry.place(x=540, y=410)
 
 # Verbose displaying widget
 verbose_area = LabelFrame(root, bd=2, relief="groove")
-verbose_area.place(x=500, y=100, width=500, height=400)
+verbose_area.place(x=850, y=150, width=600, height=400)
 bill_title = Label(verbose_area, text="VERBOSE", font="arial 15 bold", bd=4, relief="groove").pack(fill=X)
 scroll_y = Scrollbar(verbose_area, orient=VERTICAL)
 verbose_txt_area = Text(verbose_area, yscrollcommand=scroll_y.set)
@@ -74,6 +75,7 @@ scroll_y.config(command=verbose_txt_area.yview)
 verbose_txt_area.pack(fill=BOTH, expand=1)
 
 def clear_all():
+    # Setting the various Entry and Text widgets to their default values
     username.set('')
     password.set('')
     folder_path.set('')
@@ -91,6 +93,7 @@ def fetchattachments(username_val, password_val, folder_val, no_emails_val):
     connection = imaplib.IMAP4_SSL('imap.gmail.com', 993)
     verbose_txt_area.delete("1.0", "end")
 
+    # User Authentication
     try:
         connection.login(username_val, password_val)
     except:
@@ -119,12 +122,13 @@ def fetchattachments(username_val, password_val, folder_val, no_emails_val):
 
                     boolfileName = part.get_filename()
                     if bool(boolfileName): # None => False
+                        # Creating a file name by appending the timestamp so that the file names become unique
                         timestamp = datetime.now()
                         append_filename = str(timestamp.day)+str(timestamp.month)+str(timestamp.year)+str(timestamp.hour)+str(timestamp.minute)+str(timestamp.second)
                         fileName = part.get_filename().split('.')[0] + "_" + append_filename + "." + part.get_filename().split('.')[-1]
                         filePath = os.path.join(folder_val, fileName)
 
-                        if not os.path.isfile(filePath): # Check is there is already a file with the same name
+                        if not os.path.isfile(filePath): # Check if there is already a file with the same name (very rare)
                             fp = open(filePath, 'wb')
                             fp.write(part.get_payload(decode=True))
                             fp.close()
@@ -186,7 +190,7 @@ def fetchattachments_verbose(username_val, password_val, folder_val, no_emails_v
                         verbose_txt_area.insert(END, '\nDetected file : '+fileName)
                         filePath = os.path.join(folder_val, fileName)
 
-                        if not os.path.isfile(filePath): # Check is there is already a file with the same name
+                        if not os.path.isfile(filePath): # Check if there is already a file with the same name
                             verbose_txt_area.insert(END, '\nWriting file')
                             fp = open(filePath, 'wb')
                             fp.write(part.get_payload(decode=True))
@@ -243,7 +247,7 @@ def fetchattachments_delete(username_val, password_val, folder_val, no_emails_va
                         fileName = part.get_filename().split('.')[0] + "_" + append_filename + "." + part.get_filename().split('.')[-1]
                         filePath = os.path.join(folder_val, fileName)
 
-                        if not os.path.isfile(filePath): # Check is there is already a file with the same name
+                        if not os.path.isfile(filePath): # Check if there is already a file with the same name
                             fp = open(filePath, 'wb')
                             fp.write(part.get_payload(decode=True))
                             fp.close()
@@ -305,7 +309,7 @@ def fetchattachments_verbose_delete(username_val, password_val, folder_val, no_e
                         verbose_txt_area.insert(END, '\nDetected file : '+fileName)
                         filePath = os.path.join(folder_val, fileName)
 
-                        if not os.path.isfile(filePath): # Check is there is already a file with the same name
+                        if not os.path.isfile(filePath): # Check if there is already a file with the same name
                             verbose_txt_area.insert(END, '\nWriting file')
                             fp = open(filePath, 'wb')
                             fp.write(part.get_payload(decode=True))
@@ -345,8 +349,8 @@ def select_fetch():
         fetchattachments_verbose_delete(username.get(), password.get(), folder_path.get(), no_emails.get())
 
 # Button to start the extraction function
-extract_button = Button(root, text="Extract", command=select_fetch)
-extract_button.place(x=60, y=400)
+extract_button = Button(root, text="Extract",font='arial 15 bold',fg='green', command=select_fetch)
+extract_button.place(x=320, y=500)
 
 if __name__ == "__main__":
     root.mainloop()
