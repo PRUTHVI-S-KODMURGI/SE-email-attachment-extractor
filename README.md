@@ -1,5 +1,5 @@
 # SE-email-attachment-extractor
-extraction of email attachments without using email applications.
+Extraction of email attachments without using email applications.
 This is a local application that uses IMAP to extract attachments of the email.
 User needs to provide the system with mail id and password.
 Consecutive emails in the inbox can be extracted seamlessly using this system.
