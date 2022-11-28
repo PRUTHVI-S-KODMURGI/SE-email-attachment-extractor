@@ -339,6 +339,9 @@ def select_fetch():
         messagebox.showerror("Invalid Input", "The number of emails field should have an integer value")
         return
     
+    if dummy_var <= 0:
+        messagebox.showinfo("Invalid Input", "Please provide a positive integer to the number of emails field")
+    
     if verbose_val==0 and delete_val==0:
         fetchattachments(username.get(), password.get(), folder_path.get(), no_emails.get())
     elif verbose_val==1 and delete_val==0:
